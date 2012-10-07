@@ -19,8 +19,10 @@ else:
 
 for root, dirs, files in os.walk(ROOT):
   assert root.startswith(ROOT)
+  if not path.exists(path.join(root,"__init__.py")): continue
   root = root[len(ROOT)+1:]
-  if not root.startswith("pox"): continue
+  if not root.startswith("pox" + os.path.sep): continue
+  #print " ",root
 
   files = [f for f in files if f.endswith(".py")]
   #print root
