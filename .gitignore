@@ -1,0 +1,9 @@
+.*
+*.patch
+*.rej
+*.diff
+*.orig
+*.swp
+*.pcap
+*~
+docs/doctrees

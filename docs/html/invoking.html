@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Invoking POX &mdash; POX Manual Current documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'Current',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="POX Manual Current documentation" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="index.html">POX Manual Current documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="invoking-pox">
+<h1>Invoking POX<a class="headerlink" href="#invoking-pox" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Quick Start</strong>: If you just want a quick start, try: <a href="#id1"><span class="problematic" id="id2">|brk|</span></a> <code class="code mono bash docutils literal"><span class="pre">./pox.py</span> <span class="pre">samples.pretty_log</span> <span class="pre">forwarding.l2_learning</span></code></p>
+</div>
+<p>POX is invoked by running&nbsp;<code class="code mono bash docutils literal"><span class="pre">pox.py</span></code> or <code class="code mono bash docutils literal"><span class="pre">&nbsp;debug-pox.py</span></code>.&nbsp; The former is meant for running under ordinary circumstances.&nbsp; The latter is meant for when you&#8217;re trying to debug problems (it&#8217;s a good idea to use&nbsp;<code class="code mono bash docutils literal"><span class="pre">debug-pox.py</span></code>&nbsp;when doing development).</p>
+<p>POX itself has a couple of optional commandline arguments than can be used at the start of the commandline:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="85%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>option</td>
+<td>meaning</td>
+</tr>
+<tr class="row-even"><td><a href="#id3"><span class="problematic" id="id4">|nobrs|</span></a> <code class="code mono bash docutils literal"><span class="pre">--verbose</span></code> <a href="#id5"><span class="problematic" id="id6">|nobre|</span></a></td>
+<td>Display extra information (especially useful for debugging startup problems) <a href="#id7"><span class="problematic" id="id8">|br|</span></a> <em>Note:</em> Generally this is not what you want, and what you want is actually to adjust the logging level via the log.level component.</td>
+</tr>
+<tr class="row-odd"><td><a href="#id9"><span class="problematic" id="id10">|nobrs|</span></a> <code class="code mono bash docutils literal"><span class="pre">--no-cli</span></code> <a href="#id11"><span class="problematic" id="id12">|nobre|</span></a></td>
+<td>Do not start an interactive shell (No longer applies as of betta)</td>
+</tr>
+<tr class="row-even"><td><a href="#id13"><span class="problematic" id="id14">|nobrs|</span></a> <code class="code mono bash docutils literal"><span class="pre">--no-openflow</span></code> <a href="#id15"><span class="problematic" id="id16">|nobre|</span></a></td>
+<td>Do not automatically start listening for OpenFlow connections (Less useful starting with dart, which only loads OpenFlow on demand)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Add &#8211;unthreaded-sh to the above</p>
+</div>
+<p>But running POX by itself doesn&#8217;t do much – POX functionality is provided by&nbsp;<em>components</em>&nbsp;(POX comes with a handful of components, but POX&#8217;s target audience is really people who want to be developing their own).&nbsp; Components are specified on the commandline following any of the POX options above. An example of a POX component is&nbsp;<code class="code mono bash docutils literal"><span class="pre">forwarding.l2_learning</span></code>.&nbsp; This component makes OpenFlow switches operate kind of like L2 learning switches.&nbsp; To run this component, you simply name it on the command line following any POX options:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./pox.py --no-cli forwarding.l2_learning
+</pre></div>
+</div>
+<p>You can specify multiple components on the command line.&nbsp; Not all components work well together, but some do.&nbsp; Indeed, some components depend on other components, so you may&nbsp;<em>need</em>&nbsp;to specify multiple components.&nbsp; For example, you can run POX&#8217;s web server component along with&nbsp;<code class="code mono bash docutils literal"><span class="pre">l2_learning</span></code>:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./pox.py --no-cli forwarding.l2_learning web.webcore
+</pre></div>
+</div>
+<p>Some components take arguments themselves.&nbsp; These follow the component name and (like POX arguments) begin with two dashes.&nbsp; For example,&nbsp;<code class="code mono bash docutils literal"><span class="pre">l2_learning</span></code>&nbsp;has a &#8220;transparent&#8221; mode where switches will even forward packets that are usually dropped (such as LLDP messages), and the web server&#8217;s port number can be changed from the default (8000) to an arbitrary port.&nbsp; For example:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./pox.py --no-cli forwarding.l2_learning --transparent web.webcore --port<span class="o">=</span>8888
+</pre></div>
+</div>
+<p>(If you&#8217;re starting to think that command lines can get a bit long and complex, there&#8217;s a solution: write a simple component that just launches other components.)</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/invoking.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, McCauley et al..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/invoking.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

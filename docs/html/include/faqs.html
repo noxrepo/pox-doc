@@ -1,0 +1,387 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FAQs &mdash; POX Manual Current documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'Current',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="POX Manual Current documentation" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">POX Manual Current documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="faqs">
+<h1>FAQs<a class="headerlink" href="#faqs" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-versions-of-openflow-does-pox-support">
+<h2>What versions of OpenFlow does POX support?<a class="headerlink" href="#what-versions-of-openflow-does-pox-support" title="Permalink to this headline">¶</a></h2>
+<p>POX currently supports OpenFlow 1.0.&nbsp; It also supports a number of the Nicira / Open vSwitch (&#8220;nx&#8221;) extensions (many of which are the basis for features in later OpenFlow versions).</p>
+<p>Search the mailing list for a partial port to OpenFlow 1.1.</p>
+<p>We&#8217;ll probably get around to supporting later versions eventually, or would be happy to work with others on getting patches mainlined.&nbsp; Come to the mailing list and raise the subject if you&#8217;re interested.</p>
+</div>
+<div class="section" id="what-does-the-fields-ignored-due-to-unspecified-prerequisites-warning-mean">
+<h2>What does the <code class="docutils literal"><span class="pre">Fields</span> <span class="pre">ignored</span> <span class="pre">due</span> <span class="pre">to</span> <span class="pre">unspecified</span> <span class="pre">prerequisites</span></code> warning mean?<a class="headerlink" href="#what-does-the-fields-ignored-due-to-unspecified-prerequisites-warning-mean" title="Permalink to this headline">¶</a></h2>
+<p>See the next question.</p>
+</div>
+<div class="section" id="i-tried-to-install-a-table-entry-but-got-a-different-one-why">
+<h2>I tried to install a table entry but got a different one.&nbsp; Why?<a class="headerlink" href="#i-tried-to-install-a-table-entry-but-got-a-different-one-why" title="Permalink to this headline">¶</a></h2>
+<p>This question also presents itself as &#8220;What does the <code class="docutils literal"><span class="pre">Fields</span> <span class="pre">ignored</span> <span class="pre">due</span> <span class="pre">to</span> <span class="pre">unspecified</span> <span class="pre">prerequisites</span></code> warning mean?&#8221;</p>
+<p>Basically this means that you specified some higher-layer field without specifying the corresponding lower-layer fields also.&nbsp; For example, you may have tried to create a match in which you specified only&nbsp;<a href="#id1"><span class="problematic" id="id2">:mono:`tp_dst=80`</span></a>, intending to capture HTTP traffic.&nbsp; You can&#8217;t do this.&nbsp; To match TCP port 80, you must also specify that you intend to match TCP (<a href="#id3"><span class="problematic" id="id4">:mono:`nw_proto=6`</span></a>).&nbsp; And in order to match on TCP, you must also match on IP (<a href="#id5"><span class="problematic" id="id6">:mono:`dl_type=0x800`</span></a>).</p>
+<p>For more information, see the text on &#8220;normal form&#8221; flow descriptions in the&nbsp;<a href="#id7"><span class="problematic" id="id8">:mono:`ovs-ofctl`</span></a>&nbsp;man page, or the new clarifying text added to section 3.4 in the OpenFlow 1.0.1 specification.</p>
+</div>
+<div class="section" id="what-is-a-datapath-what-is-a-dpid">
+<h2>What is a &#8220;datapath&#8221;?&nbsp; What is a DPID?<a class="headerlink" href="#what-is-a-datapath-what-is-a-dpid" title="Permalink to this headline">¶</a></h2>
+<p>More or less, a datapath is a logical OpenFlow switch.&nbsp; A physical &#8220;OpenFlow switch&#8221; – meaning a box with ethernet ports&nbsp;– may have more than one datapath (though usually won&#8217;t).</p>
+<p>A DPID is a datapath identifier, and is part of the OpenFlow specification, though the OpenFlow specification calls it a datapath_id, and is pretty vague about it in general.&nbsp; Basically, it is a unique identifier for a switch so that someone/something (e.g., an OpenFlow controller) can uniquely identify the switch.&nbsp; During the initial handshake, a switch sends its DPID to the controller as part of the&nbsp;<a href="#id9"><span class="problematic" id="id10">:mono:`ofp_switch_features`</span></a>&nbsp;message.</p>
+<p>A DPID is 64 bits.&nbsp; The spec claims the lower 48 bits are&nbsp;<em>intended</em>&nbsp;to be the switch&#8217;s ethernet address.&nbsp; This statement has always been a bit confusing &#8211; traditionally, a switch isn&#8217;t an endpoint, so what addresses does a switch even really have?&nbsp; The only answer that makes sense to this author is that it&#8217;s the ethernet address associated with the IP address used for the OpenFlow control channel.&nbsp; But in implementations, this is not always true because the OpenFlow control channel often may originate from one of several interfaces and it&#8217;ll use whatever ethernet address goes with it.</p>
+<p>In practice, its pretty arbitrary, and often user-configurable independent of any ethernet address.&nbsp; It&#8217;s probably a decent idea to always just treat it as an opaque value which should be unique.&nbsp; If a vendor happens to base it on some particular ethernet address, treat that as an implementation detail for how they achieve uniqueness and not as there being any sort of real relationship between the two.</p>
+<p>To give a more concrete answer: with Open vSwitch, it defaults to the ethernet address of the switch&#8217;s &#8220;local&#8221; port with the top 16 bits zeroed (this ethernet address being generated at random when last I checked).&nbsp; With Mininet, this generally gets overridden to match the number of the Mininet switch.</p>
+<p>See the first few sections of the &#8220;OpenFlow in POX&#8221; section of this manual for more.</p>
+</div>
+<div class="section" id="how-do-i-create-a-firewall-block-tcp-ports">
+<h2>How do I create a firewall / block TCP ports?<a class="headerlink" href="#how-do-i-create-a-firewall-block-tcp-ports" title="Permalink to this headline">¶</a></h2>
+<p>An easy way to do this is to use a forwarding component which does fine-grained flows (e.g.,&nbsp;<a href="#id11"><span class="problematic" id="id12">:mono:`l2_learning`</span></a>), and then intercept the&nbsp;<a href="#id13"><span class="problematic" id="id14">:mono:`PacketIn`</span></a>&nbsp;events.&nbsp; When you see a packet you want to block, kill the event.&nbsp; This will keep&nbsp;<a href="#id15"><span class="problematic" id="id16">:mono:`l2_learning`</span></a>&nbsp;from seeing the event and installing a flow for it.&nbsp; The&nbsp;<a href="#id17"><span class="problematic" id="id18">:mono:`mac_blocker`</span></a>&nbsp;component pretty much works like this.&nbsp; Here&#8217;s a simple example for blocking arbitrary TCP ports:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Block TCP ports</span>
+
+<span class="sd">Save as ext/blocker.py and run along with l2_learning.</span>
+
+<span class="sd">You can specify ports to block on the commandline:</span>
+<span class="sd">./pox.py forwarding.l2_learning blocker --ports=80,8888,8000</span>
+
+<span class="sd">Alternatively, if you run with the &quot;py&quot; component, you can use the CLI:</span>
+<span class="sd">./pox.py forwarding.l2_learning blocker py</span>
+<span class="sd"> ...</span>
+<span class="sd">POX&gt; block(80, 8888, 8000)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pox.core</span> <span class="kn">import</span> <span class="n">core</span>
+
+<span class="c"># A set of ports to block</span>
+<span class="n">block_ports</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">block_handler</span> <span class="p">(</span><span class="n">event</span><span class="p">):</span>
+  <span class="c"># Handles packet events and kills the ones with a blocked port number</span>
+
+  <span class="n">tcpp</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">parsed</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;tcp&#39;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">tcpp</span><span class="p">:</span> <span class="k">return</span> <span class="c"># Not TCP</span>
+  <span class="k">if</span> <span class="n">tcpp</span><span class="o">.</span><span class="n">srcport</span> <span class="ow">in</span> <span class="n">block_ports</span> <span class="ow">or</span> <span class="n">tcpp</span><span class="o">.</span><span class="n">dstport</span> <span class="ow">in</span> <span class="n">block_ports</span><span class="p">:</span>
+    <span class="c"># Halt the event, stopping l2_learning from seeing it</span>
+    <span class="c"># (and installing a table entry for it)</span>
+    <span class="n">core</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;blocker&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Blocked TCP </span><span class="si">%s</span><span class="s"> &lt;-&gt; </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">,</span>
+                                    <span class="n">tcpp</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span> <span class="n">tcpp</span><span class="o">.</span><span class="n">dstport</span><span class="p">)</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">halt</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="k">def</span> <span class="nf">unblock</span> <span class="p">(</span><span class="o">*</span><span class="n">ports</span><span class="p">):</span>
+  <span class="n">block_ports</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span><span class="n">ports</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">block</span> <span class="p">(</span><span class="o">*</span><span class="n">ports</span><span class="p">):</span>
+  <span class="n">block_ports</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ports</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">launch</span> <span class="p">(</span><span class="n">ports</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">):</span>
+
+  <span class="c"># Add ports from commandline to list of ports to block</span>
+  <span class="n">block_ports</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ports</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+
+  <span class="c"># Add functions to Interactive so when you run POX with py, you</span>
+  <span class="c"># can easily add/remove ports to block.</span>
+  <span class="n">core</span><span class="o">.</span><span class="n">Interactive</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;block&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">block</span>
+  <span class="n">core</span><span class="o">.</span><span class="n">Interactive</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;unblock&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unblock</span>
+
+  <span class="c"># Listen to packet events</span>
+  <span class="n">core</span><span class="o">.</span><span class="n">openflow</span><span class="o">.</span><span class="n">addListenerByName</span><span class="p">(</span><span class="s">&quot;PacketIn&quot;</span><span class="p">,</span> <span class="n">block_handler</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="how-can-i-change-the-openflow-port-from-6633">
+<h2>How can I change the OpenFlow port from 6633?<a class="headerlink" href="#how-can-i-change-the-openflow-port-from-6633" title="Permalink to this headline">¶</a></h2>
+<p>If you turn on verbose logging, you&#8217;ll see that it&#8217;s the openflow.of_01 module which listens for connections.&nbsp; That&#8217;s the hint: it&#8217;s this component that you need to reconfigure.&nbsp; Do so by passing a &#8220;port&#8221; argument to this component on the commandline:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./pox.py openflow.of_01 --port<span class="o">=</span><span class="m">1234</span> &lt;other commandline arguments&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="how-can-i-have-some-components-start-automatically-every-time-i-run-pox">
+<h2>How can I have some components start automatically every time I run POX?<a class="headerlink" href="#how-can-i-have-some-components-start-automatically-every-time-i-run-pox" title="Permalink to this headline">¶</a></h2>
+<p>The short answer is that there&#8217;s no supported way for doing this.&nbsp;&nbsp;<em>However</em>, it&#8217;s pretty simple to just create a small component that launches whatever other components you want.</p>
+<p>For example, let&#8217;s say you were tired of always having to remember the following commandline:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./pox.py log.level --DEBUG samples.pretty_log openflow.keepalive --interval<span class="o">=</span><span class="m">15</span> forwarding.l2_pairs
+</pre></div>
+</div>
+<p>By writing a simple component, you can replace with above with simply:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./pox.py startup
+</pre></div>
+</div>
+<p>The code for the simple component should be placed in <a href="#id19"><span class="problematic" id="id20">:mono:`ext/startup.py`</span></a> and would contain the following code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Put me in ext/startup.py</span>
+
+<span class="k">def</span> <span class="nf">launch</span> <span class="p">():</span>
+  <span class="kn">from</span> <span class="nn">pox.log.level</span> <span class="kn">import</span> <span class="n">launch</span>
+  <span class="n">launch</span><span class="p">(</span><span class="n">DEBUG</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="kn">from</span> <span class="nn">pox.samples.pretty_log</span> <span class="kn">import</span> <span class="n">launch</span>
+  <span class="n">launch</span><span class="p">()</span>
+
+  <span class="kn">from</span> <span class="nn">pox.openflow.keepalive</span> <span class="kn">import</span> <span class="n">launch</span>
+  <span class="n">launch</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span> <span class="c"># 15 seconds</span>
+
+  <span class="kn">from</span> <span class="nn">pox.forwarding.l2_pairs</span> <span class="kn">import</span> <span class="n">launch</span>
+  <span class="n">launch</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that here, as elsewhere in POX, it&#8217;s important to import POX modules using their full name – including the leading &#8220;pox&#8221; package.&nbsp; Not doing so can lead to confusing and incorrect behavior.</p>
+</div>
+</div>
+<div class="section" id="how-do-i-get-switches-to-send-complete-packet-payloads-to-the-controller">
+<h2>How do I get switches to send complete packet payloads to the controller?<a class="headerlink" href="#how-do-i-get-switches-to-send-complete-packet-payloads-to-the-controller" title="Permalink to this headline">¶</a></h2>
+<p>By default, when a packet misses all the entries in the flow table, only the first X bytes of the packet are sent to the controller.&nbsp; In POX, this defaults to&nbsp;<a href="#id21"><span class="problematic" id="id22">:mono:`OFP_DEFAULT_MISS_SEND_LEN`</span></a>, which is 128.&nbsp; This is probably enough for, e.g., ethernet, IP, and TCP headers... but probably not enough for complete packets.&nbsp; If you want to inspect complete packet payloads, you have two options:</p>
+<ol class="arabic simple">
+<li><em>Install a table entry.</em>&nbsp; If you install a table entry with a&nbsp;<a href="#id23"><span class="problematic" id="id24">:mono:`packet_out`</span></a>&nbsp;to&nbsp;<a href="#id25"><span class="problematic" id="id26">:mono:`OFPP_CONTROLLER`</span></a>, POX will have the switch send the complete packet by default (you can manually set some smaller number of bytes if you want).</li>
+</ol>
+<p>2. <em>Change the miss send length.</em>&nbsp;If you set&nbsp;<a href="#id27"><span class="problematic" id="id28">:mono:`core.openflow.miss_send_len`</span></a>&nbsp;during startup (before any switches connect), switches should send that many bytes when a packet misses the whole table.
+Check the&nbsp;<a href="#id29"><span class="problematic" id="id30">:mono:`misc.packet_dump`</span></a>&nbsp;component for an example.</p>
+</div>
+<div class="section" id="how-can-i-communicate-between-components">
+<h2>How can I communicate between components?<a class="headerlink" href="#how-can-i-communicate-between-components" title="Permalink to this headline">¶</a></h2>
+<p>Components are just Python packages and modules, so one way you can do this is the same way you communicate between any Python modules – import one of them and access its top-level variables and functions.</p>
+<p>POX also has an alternate mechanism, which is described more in the section&nbsp;[Working with POX: The POX Core object|https://openflow.stanford.edu/display/ONL/POX+Wiki#POXWiki-WorkingwithPOXThePOXCoreobject].</p>
+</div>
+<div class="section" id="how-can-i-use-pox-with-mininet">
+<h2>How can I use POX with Mininet?<a class="headerlink" href="#how-can-i-use-pox-with-mininet" title="Permalink to this headline">¶</a></h2>
+<p>Use the&nbsp;<a href="#id31"><span class="problematic" id="id32">:mono:`remote`</span></a>&nbsp;controller type.&nbsp; For example, if you are running POX on the same machine as Mininet:
+{quote}
+{noformat}
+mn &#8211;topo=linear &#8211;mac &#8211;controller=remote
+{noformat}
+{quote}
+(The&nbsp;<a href="#id33"><span class="problematic" id="id34">:mono:`&#8211;mac`</span></a>&nbsp;option is optional, but can make debugging easier.)</p>
+<p>A common configuration is to run Mininet in a virtual machine and run POX in your host environment.&nbsp; In this case, point Mininet at an IP address of the host environment.&nbsp; If you&#8217;re using VirtualBox and a &#8220;Host-only Adapter&#8221;, this is the address assigned to the VirtualBox virtual adapter (e.g.,&nbsp;<a href="#id35"><span class="problematic" id="id36">:mono:`vboxnet0`</span></a>).&nbsp; You do this slightly differently if you&#8217;re using Mininet 1 or Mininet 2.&nbsp; For Mininet 1:
+{quote}
+{noformat}
+mn &#8211;topo=linear &#8211;mac &#8211;controller=remote &#8211;ip=192.168.56.1
+{noformat}
+{quote}
+For Mininet 2:
+{quote}
+{noformat}
+mn &#8211;topo=linear &#8211;mac &#8211;controller=remote,ip=192.168.56.1
+{noformat}
+{quote}
+Additionally, in Mininet 2, you may want to specify the&nbsp;<a href="#id37"><span class="problematic" id="id38">:mono:`&#8211;nolistenport`</span></a>&nbsp;option.</p>
+</div>
+<div class="section" id="i-m-seeing-many-packet-in-messages-and-forwarding-isn-t-working-what-gives">
+<h2>I&#8217;m seeing many packet_in messages and forwarding isn&#8217;t working; what gives?<a class="headerlink" href="#i-m-seeing-many-packet-in-messages-and-forwarding-isn-t-working-what-gives" title="Permalink to this headline">¶</a></h2>
+<p>This problem is often seen when attempting to use one of the &#8220;learning&#8221; forwarding components (<a href="#id39"><span class="problematic" id="id40">:mono:`l2_learning`</span></a>,&nbsp;<a href="#id41"><span class="problematic" id="id42">:mono:`l2_multi`</span></a>, etc.) on a mesh or other topology with a loop.&nbsp; These forwarding components do not attempt to work on loopy topologies.</p>
+<p>The&nbsp;<a href="#id43"><span class="problematic" id="id44">:mono:`spanning_tree`</span></a>&nbsp;component is meant to be a fairly generic solution to this problem, so you might try running it as well.&nbsp; It can also be helpful to prevent broadcasts until discovery has had time to discover the entire topology.&nbsp; Some components (such as&nbsp;<a href="#id45"><span class="problematic" id="id46">:mono:`l2_learning`</span></a>) have an option to enforce this.</p>
+</div>
+<div class="section" id="does-pox-support-topologies-with-loops">
+<h2>Does POX support topologies with loops?<a class="headerlink" href="#does-pox-support-topologies-with-loops" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s start with making it clear that this is a broken question because POX itself simply doesn&#8217;t care.&nbsp; The real question is &#8220;Do any of the forwarding components that come with POX support topologies with loops?&#8221;&nbsp; The answer is ... sort of!&nbsp; As far as I remember, none of them&nbsp;<a href="#id47"><span class="problematic" id="id48">*</span></a><a href="#id95"><span class="problematic" id="id96">explicitly_</span></a>&nbsp;support loops.&nbsp; However, several of them are compatible with the&nbsp;<a href="#id49"><span class="problematic" id="id50">:mono:`openflow.spanning_tree`</span></a>&nbsp;component.&nbsp;&nbsp;<a href="#id51"><span class="problematic" id="id52">:mono:`openflow.spanning_tree`</span></a>&nbsp;disables flooding on ports, leaving only a tree.&nbsp; For forwarding components which only loop during floods, don&#8217;t change the port flood bit, and work with the discovery component, this may be good enough.</p>
+<p>See the section on the&nbsp;<a href="#id53"><span class="problematic" id="id54">:mono:`openflow.spanning_tree`</span></a>&nbsp;component and the above FAQ question for more.</p>
+</div>
+<div class="section" id="switches-keep-disconnecting-especially-with-pantou-reference-switch-help">
+<h2>Switches keep disconnecting (especially with Pantou/reference switch).&nbsp; Help?<a class="headerlink" href="#switches-keep-disconnecting-especially-with-pantou-reference-switch-help" title="Permalink to this headline">¶</a></h2>
+<p>The short answer is that you should run the openflow.keepalive component too.&nbsp; See the description of this component above for more information.</p>
+</div>
+<div class="section" id="why-doesn-t-the-openflow-webservice-component-work">
+<h2>Why doesn&#8217;t the openflow.webservice component work?<a class="headerlink" href="#why-doesn-t-the-openflow-webservice-component-work" title="Permalink to this headline">¶</a></h2>
+<p>If you&#8217;re sending requests to the&nbsp;<a href="#id55"><span class="problematic" id="id56">:mono:`openflow.webservice`</span></a>&nbsp;component and it&#8217;s not sending back replies, this chances are that you&#8217;re not conforming to the JSON-RPC spec.&nbsp; Specifically, you&#8217;re not including an &#8220;<a href="#id57"><span class="problematic" id="id58">:mono:`id`</span></a>&#8221; key in your request.&nbsp; Add one and set it to an integer and see if that helps.&nbsp; See the&nbsp;<a href="#id59"><span class="problematic" id="id60">:mono:`openflow.webservice`</span></a>&nbsp;examples in this manual for additional information.</p>
+</div>
+<div class="section" id="what-are-these-log-messages-from-the-packet-subsystem">
+<h2>What are these log messages from the packet subsystem?<a class="headerlink" href="#what-are-these-log-messages-from-the-packet-subsystem" title="Permalink to this headline">¶</a></h2>
+<p>You may see info level log messages from the packet subsystem like:</p>
+<p><a href="#id61"><span class="problematic" id="id62">:mono:`(dhcp parse) warning DHCP packet data too short to parse header`</span></a></p>
+<p><a href="#id63"><span class="problematic" id="id64">:mono:`(udp parse) warning UDP packet data too short to parse header: data len X`</span></a></p>
+<p><a href="#id65"><span class="problematic" id="id66">:mono:`(icmp parse) warning ICMP packet data too short`</span></a></p>
+<p><em>These aren&#8217;t errors or necessarily indicative of any problem.</em></p>
+<p>When OpenFlow switches send packets to the controller, they often do not send the entire packet.&nbsp; When the packet is sent to the controller via an output action to the OFPP_CONTROLLER port, the output action can contain the number of bytes to send.&nbsp; When a packet is sent to the controller due to a table miss, this length can be set via OFPT_SET_CONFIG, but often defaults to 128 bytes.</p>
+<p>When the switch only sends a partial packet, POX&#8217;s packet library may well not be able to parse the entire packet since the entire packet isn&#8217;t actually there.&nbsp; The decision was made to log this message at info level instead of debug level because debug messages within non-component portions of POX are intended to help debug POX itself, and the condition leading to these isn&#8217;t indicative of bugs in POX.&nbsp;&nbsp;<a href="#id67"><span class="problematic" id="id68">*</span></a>It&#8217;s possible that we should bend the rules here and log them at debug level anyway; feel free to register your opinion on noxrepo.org (in the forum or pox-dev mailing list)._</p>
+<p>Some things you can do about this:</p>
+<p># Ignore it unless it&#8217;s actually causing a problem for you (because your application requires these packets to be parsed correctly).
+# Turn the packet subsystem&#8217;s log level to warning (<a href="#id69"><span class="problematic" id="id70">:mono:`log.level &#8211;packet=WARN`</span></a>).
+# Install a flow to send the entirety of relevant packets to the controller (an ofp_action_output to OFPP_CONTROLLER will default to doing this).
+# Tell the switch to send complete packets to the controller on table misses (an easy way is to simply invoke the&nbsp;<a href="#id71"><span class="problematic" id="id72">:mono:`misc.full_payload`</span></a>&nbsp;component).</p>
+</div>
+<div class="section" id="i-installed-ip-based-table-entries-but-ping-tcp-doesn-t-work-why-not">
+<h2>I Installed IP-Based Table Entries But Ping/TCP Doesn&#8217;t Work.&nbsp; Why not?<a class="headerlink" href="#i-installed-ip-based-table-entries-but-ping-tcp-doesn-t-work-why-not" title="Permalink to this headline">¶</a></h2>
+<p>To answer your question with a question: are you handling ARP?</p>
+</div>
+<div class="section" id="does-pox-support-python-3">
+<h2>Does POX support Python 3?<a class="headerlink" href="#does-pox-support-python-3" title="Permalink to this headline">¶</a></h2>
+<p>Not yet.</p>
+<p>At this point, Python 2 is still pretty much the standard. Additionally, it&#8217;s quite common to run POX using the PyPy interpreter, which does not yet support Python 3.&nbsp; In particular, we don&#8217;t have much desire to support&nbsp;<a href="#id73"><span class="problematic" id="id74">*</span></a><a href="#id97"><span class="problematic" id="id98">both_</span></a>&nbsp;Python 2 and 3 simultaneously.&nbsp; So we expect to someday support Python 3, but not until it seems like it&#8217;s what the majority of users want, and probably not until after PyPy does.</p>
+<p>If Python 3 support is important to you&nbsp;<a href="#id75"><span class="problematic" id="id76">*</span></a><a href="#id99"><span class="problematic" id="id100">now_</span></a>, you should start an issue on the github tracker or post about it on pox-dev.&nbsp; Especially if you&#8217;re willing to do some of the work, we&#8217;ll be happy to discuss getting this done, how we can help, and how we can get your work merged into the main repository.</p>
+<p>(This question hasn&#8217;t actually been asked a single time, much less frequently, as its inclusion in a FAQ would imply.&nbsp; I just wanted to document the answer.)</p>
+</div>
+<div class="section" id="i-d-like-to-contribute-can-i-do-you-have-project-ideas">
+<h2>I&#8217;d like to contribute.&nbsp; Can I?&nbsp; Do you have project ideas?<a class="headerlink" href="#i-d-like-to-contribute-can-i-do-you-have-project-ideas" title="Permalink to this headline">¶</a></h2>
+<p>Sure you can.&nbsp; Some thoughts:</p>
+<ul class="simple">
+<li>Read the&nbsp;[Coding Conventions|https://openflow.stanford.edu/display/ONL/POX+Wiki#POXWiki-CodingConventions]&nbsp;section of the manual</li>
+<li>Join the pox-dev mailing list at noxrepo.org</li>
+<li>Get a github account and fork the POX repository</li>
+<li>Submit pull requests on github or formatted patches on pox-dev</li>
+</ul>
+<p>If you&#8217;re looking for project ideas:</p>
+<ul class="simple">
+<li>Check POX&#8217;s issue tracker on github</li>
+<li>Ask the mailing list – in particular, Murphy has started maintaining a list of projects suitable for students or interested parties and may be able to give you a suggestion</li>
+</ul>
+</div>
+<div class="section" id="what-s-this-warning-like-core-still-waiting-on-1-component-s">
+<h2>What&#8217;s this warning like &#8220;core:Still waiting on 1 component(s)&#8221;?<a class="headerlink" href="#what-s-this-warning-like-core-still-waiting-on-1-component-s" title="Permalink to this headline">¶</a></h2>
+<p>A dependency of some component you&#8217;re running hasn&#8217;t been met.&nbsp; To rectify this, you should probably run the missing component by including it on the commandline.&nbsp; If you run with logging at DEBUG level, you&#8217;ll get a more detailed message, such as &#8220;<a href="#id77"><span class="problematic" id="id78">:mono:`core:startup() in pox.forwarding.l2_multi still waiting for: openflow_discovery`</span></a>&#8221;.&nbsp; In this case, it indicates that&nbsp;<a href="#id79"><span class="problematic" id="id80">:mono:`forwarding.l2_multi`</span></a>&nbsp;requires&nbsp;<a href="#id81"><span class="problematic" id="id82">:mono:`openflow.discovery`</span></a>.</p>
+</div>
+<div class="section" id="why-doesn-t-pox-s-discovery-use-the-normal-lldp-mac-address">
+<h2>Why doesn&#8217;t POX&#8217;s discovery use the normal LLDP MAC address?<a class="headerlink" href="#why-doesn-t-pox-s-discovery-use-the-normal-lldp-mac-address" title="Permalink to this headline">¶</a></h2>
+<p>POX&#8217;s discovery uses the MAC address that Nicira defined for use with OpenFlow-based discovery and which was used by the NOX controller.&nbsp; The significant difference between the normal one and the Nicira one is that the original one is in the bridge-filtered range, which means that Ethernet switches should never forward it.&nbsp; If your network is entirely made of OpenFlow switches, this doesn&#8217;t make any difference.&nbsp; But if your network is a combination of OpenFlow switches and traditional Ethernet switches, it does.</p>
+<p>Imagine you had the following topology, where A and B are OpenFlow switches, and S is a standard Ethernet switch.</p>
+<p><a href="#id83"><span class="problematic" id="id84">:mono:`&nbsp; A &#8211; S &#8211; B`</span></a></p>
+<p>Imagine that the controller tells A to send a discovery packet with the normal LLDP MAC address.&nbsp; It gets to S.&nbsp; S will drop it, since the address is bridge-filtered.&nbsp; Thus, the controller concludes that packets sent from A will not reach B.&nbsp; This is obviously false except in the very special (that is, unusual) case where you&#8217;re using bridge-filtered MAC addresses!</p>
+<p>By using a non-bridge-filtered address for discovery, POX (and NOX before it) can &#8220;see through&#8221; traditional Ethernet switches.</p>
+</div>
+<div class="section" id="what-s-a-good-strategy-for-debugging-a-problem-with-my-pox-based-controller">
+<h2>What&#8217;s a good strategy for debugging a problem with my POX-based controller?<a class="headerlink" href="#what-s-a-good-strategy-for-debugging-a-problem-with-my-pox-based-controller" title="Permalink to this headline">¶</a></h2>
+<p>The&nbsp;[Open vSwitch FAQ|https://raw.githubusercontent.com/openvswitch/ovs/master/FAQ]&nbsp;has a really good entry on this subject:
+{quote}
+Q: I have a sophisticated network setup involving Open vSwitch, VMs or multiple hosts, and other components. The behavior isn&#8217;t what I expect. Help!</p>
+<p>A: To debug network behavior problems, trace the path of a packet, hop-by-hop, from its origin in one host to a remote host. If that&#8217;s correct, then trace the path of the response packet back to the origin. Usually a simple ICMP echo request and reply (&#8220;ping&#8221;) packet is good enough. Start by initiating an ongoing &#8220;ping&#8221; from the origin host to a remote host. If you are tracking down a connectivity problem, the &#8220;ping&#8221; will not display any successful output, but packets are still being sent. (In this case the packets being sent are likely ARP rather than ICMP.)
+{quote}
+The entry then goes on in further detail, including information on some of the tools available to you.&nbsp; While they are Open vSwitch-centric, a lot of it applies (perhaps in slightly altered form) to debugging SDN programs in general.</p>
+</div>
+<div class="section" id="i-ve-got-a-problem-bug-can-you-help-me">
+<h2>I&#8217;ve got a problem / bug!&nbsp; Can you help me?<a class="headerlink" href="#i-ve-got-a-problem-bug-can-you-help-me" title="Permalink to this headline">¶</a></h2>
+<p>Possibly.&nbsp; There are a number of things you can do to help yourself, though.&nbsp; If none of those work or apply, there are a number of things you can do to help us help you.&nbsp; Here are some things you might try:</p>
+<p># <em>Read the logs.</em>&nbsp; If the logs don&#8217;t seem to say anything useful, try reading them at a lower log level, such as the DEBUG level.&nbsp; That way, you&#8217;ll get&nbsp;<em>all</em>&nbsp;the log messages.&nbsp; Do this by adding&nbsp;<a href="#id85"><span class="problematic" id="id86">:mono:`log.level &#8211;DEBUG`</span></a>&nbsp;to your commandline.&nbsp; See the&nbsp;<a href="#id87"><span class="problematic" id="id88">:mono:`log.level`</span></a>&nbsp;component section for more info on adjusting log levels.&nbsp; In particular, pay attention for warnings or errors (e.g., see the &#8220;Still waiting on...&#8221; FAQ entry)!
+# <em>Look at the OpenFlow traffic.</em>&nbsp; If you don&#8217;t seem to be getting an event that you think you should be, or you think you&#8217;re sending messages but the switch doesn&#8217;t seem to be responding to, or anything else where you think there&#8217;s a breakdown in communication between a switch and POX, it can be helpful to look at what actually got put on the wire.&nbsp; There is an OpenFlow dissector for Wireshark (you can Google for it).&nbsp; You can either run it as usual, or you can use POX&#8217;s&nbsp;<a href="#id89"><span class="problematic" id="id90">:mono:`openflow.debug`</span></a>&nbsp;component to generate synthetic traces which show exactly what POX thinks it saw – one message per synthetic &#8220;packet&#8221; (which makes the Wireshark list easier to read).
+# <em>Run a newer version.</em>&nbsp; Particularly, if you are running a release branch, you might think about running the active branch instead.&nbsp; While active branches may contain new problems, they also fix old ones!&nbsp; See the &#8220;Selecting a Branch / Version&#8221; section for more information.
+# <em>Check the other FAQs.&nbsp;</em>&nbsp;Your question may already be answered!
+# <em>Search the mailing list archive.</em>&nbsp; This would be more helpful if it weren&#8217;t so flaky.&nbsp; Sorry about that, hopefully we&#8217;ll get around to fixing it before too long!
+If none of those work, you might try posting to the pox-dev mailing list (sign up at&nbsp;[<a class="reference external" href="http://www.noxrepo.org/community/mailing-lists/">http://www.noxrepo.org/community/mailing-lists/</a>]).&nbsp; When you do, you&#8217;ll probably get better results the more you can do the following:</p>
+<p># <em>Post the commandline with which you invoked POX.</em>
+# <em>Post the POX log.</em>&nbsp; It&#8217;s probably a good idea to post them at DEBUG level.&nbsp; Even if you didn&#8217;t see anything in the log, it may be helpful to someone else.&nbsp; The first part of the log (before the Up message) is especially useful, as it tells which operating system and Python interpreter you are running, and many components announce themselves.&nbsp; If you don&#8217;t post this, you might at least try to include some of this information yourself.
+# <em>Post the traceback.</em>&nbsp; This sort of goes with the prior entry, but it&#8217;s worth making specific note.&nbsp; If you get an exception, post the full text of the exception including the traceback if possible.
+# <em>Post which version of POX you are using.</em>&nbsp; Did you just do a&nbsp;<a href="#id91"><span class="problematic" id="id92">:mono:`git clone http://github.org/noxrepo/pox`</span></a>, or did you switch branches?&nbsp; Did you do this recently or are you potentially using an older version?
+# <em>Post what kind of switches you are using.</em>&nbsp; Are you running POX with Mininet?&nbsp; Which version?&nbsp; What commandline did you use to invoke Mininet?&nbsp; If it&#8217;s custom, consider posting your Mininet topology or script.&nbsp; If you&#8217;re running with hardware switches, what kind?&nbsp; If you&#8217;re running with a software switch, which one and which version?
+# <em>Post code which illustrates the problem.</em>&nbsp; A minimal example is great, but anything is better than nothing.
+# <em>Post a trace of the controller-switch OpenFlow traffic.&nbsp;</em>&nbsp;This is data you should have collected yourself as part of step 2 of the previous list.&nbsp; Capture the traffic with Wireshark or the&nbsp;<a href="#id93"><span class="problematic" id="id94">:mono:`openflow.debug`</span></a>&nbsp;component and post it to the list.
+# <em>Post what you&#8217;ve tried already.</em>&nbsp; Hopefully you&#8217;ve tried to address the issue yourself.&nbsp; What have you tried and what were the results?
+Doing the above makes it easier for people to help you, and also potentially saves time&nbsp;– if you don&#8217;t do the things mentioned above, it&#8217;s quite possible that the first suggestions you get from the mailing list will be to try the things mentioned above!</p>
+<p>If you&#8217;re new to mailing lists and asking questions online, you may want to view some...
+{expand:title=General Mailing List Tips}In general, the POX mailing list is polite and friendly and useful and other good things, and it has not suffered the negativity/flaming/etc. that people sometimes associate with mailing lists (usually larger ones).&nbsp; That said, if you&#8217;re new to mailing lists, it&#8217;s still not a bad idea to read a bit about mailing list etiquette and how to ask questions on a mailing list.&nbsp; This is not necessarily because it&#8217;ll help you avoid rudeness or anything, but because _*it will make more people want to help you*_ (which is good for you), and it will allow the ones that do to _*get you the answers you want faster*_ (which is good for everyone).\ \
+Eric S. Raymond, who wrote [The Cathedral and the Bazaar: Musings on Linux and Open Source by an Accidental Revolutionary|http://en.wikipedia.org/wiki/The_Cathedral_and_the_Bazaar] (along with NetHack and some other good stuff), has written up a guide on [How To Ask Questions The Smart Way|http://www.catb.org/esr/faqs/smart-questions.html] (on mailing lists).&nbsp; In particular, the &#8220;[Be precise and informative about your problem|http://www.catb.org/esr/faqs/smart-questions.html#beprecise]&#8221;, &#8220;[Describe the goal, not the step|http://www.catb.org/esr/faqs/smart-questions.html#goal]&#8221;, and &#8220;[When asking about code|http://www.catb.org/esr/faqs/smart-questions.html#code]&#8221; sections are good reading.&nbsp; While it has nothing to do with POX at all, the Apache Jena project has a much shorter but still good guide on [How to ask a good question|http://jena.apache.org/help_and_support/].\ \\
+{expand}</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FAQs</a><ul>
+<li><a class="reference internal" href="#what-versions-of-openflow-does-pox-support">What versions of OpenFlow does POX support?</a></li>
+<li><a class="reference internal" href="#what-does-the-fields-ignored-due-to-unspecified-prerequisites-warning-mean">What does the <code class="docutils literal"><span class="pre">Fields</span> <span class="pre">ignored</span> <span class="pre">due</span> <span class="pre">to</span> <span class="pre">unspecified</span> <span class="pre">prerequisites</span></code> warning mean?</a></li>
+<li><a class="reference internal" href="#i-tried-to-install-a-table-entry-but-got-a-different-one-why">I tried to install a table entry but got a different one.&nbsp; Why?</a></li>
+<li><a class="reference internal" href="#what-is-a-datapath-what-is-a-dpid">What is a &#8220;datapath&#8221;?&nbsp; What is a DPID?</a></li>
+<li><a class="reference internal" href="#how-do-i-create-a-firewall-block-tcp-ports">How do I create a firewall / block TCP ports?</a></li>
+<li><a class="reference internal" href="#how-can-i-change-the-openflow-port-from-6633">How can I change the OpenFlow port from 6633?</a></li>
+<li><a class="reference internal" href="#how-can-i-have-some-components-start-automatically-every-time-i-run-pox">How can I have some components start automatically every time I run POX?</a></li>
+<li><a class="reference internal" href="#how-do-i-get-switches-to-send-complete-packet-payloads-to-the-controller">How do I get switches to send complete packet payloads to the controller?</a></li>
+<li><a class="reference internal" href="#how-can-i-communicate-between-components">How can I communicate between components?</a></li>
+<li><a class="reference internal" href="#how-can-i-use-pox-with-mininet">How can I use POX with Mininet?</a></li>
+<li><a class="reference internal" href="#i-m-seeing-many-packet-in-messages-and-forwarding-isn-t-working-what-gives">I&#8217;m seeing many packet_in messages and forwarding isn&#8217;t working; what gives?</a></li>
+<li><a class="reference internal" href="#does-pox-support-topologies-with-loops">Does POX support topologies with loops?</a></li>
+<li><a class="reference internal" href="#switches-keep-disconnecting-especially-with-pantou-reference-switch-help">Switches keep disconnecting (especially with Pantou/reference switch).&nbsp; Help?</a></li>
+<li><a class="reference internal" href="#why-doesn-t-the-openflow-webservice-component-work">Why doesn&#8217;t the openflow.webservice component work?</a></li>
+<li><a class="reference internal" href="#what-are-these-log-messages-from-the-packet-subsystem">What are these log messages from the packet subsystem?</a></li>
+<li><a class="reference internal" href="#i-installed-ip-based-table-entries-but-ping-tcp-doesn-t-work-why-not">I Installed IP-Based Table Entries But Ping/TCP Doesn&#8217;t Work.&nbsp; Why not?</a></li>
+<li><a class="reference internal" href="#does-pox-support-python-3">Does POX support Python 3?</a></li>
+<li><a class="reference internal" href="#i-d-like-to-contribute-can-i-do-you-have-project-ideas">I&#8217;d like to contribute.&nbsp; Can I?&nbsp; Do you have project ideas?</a></li>
+<li><a class="reference internal" href="#what-s-this-warning-like-core-still-waiting-on-1-component-s">What&#8217;s this warning like &#8220;core:Still waiting on 1 component(s)&#8221;?</a></li>
+<li><a class="reference internal" href="#why-doesn-t-pox-s-discovery-use-the-normal-lldp-mac-address">Why doesn&#8217;t POX&#8217;s discovery use the normal LLDP MAC address?</a></li>
+<li><a class="reference internal" href="#what-s-a-good-strategy-for-debugging-a-problem-with-my-pox-based-controller">What&#8217;s a good strategy for debugging a problem with my POX-based controller?</a></li>
+<li><a class="reference internal" href="#i-ve-got-a-problem-bug-can-you-help-me">I&#8217;ve got a problem / bug!&nbsp; Can you help me?</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/include/faqs.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, McCauley et al..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/include/faqs.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>
