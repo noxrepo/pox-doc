@@ -38,7 +38,9 @@ The main POX branches are named alphabetically after fish.  You can see the one
 * *betta (Until May 2013)*
 * *carp (Until October 2013)*
 * *dart (Until July 2014)*
-* *eel (...)*
+* *eel (Until November 2017)*
+* *fangtooth (Until March 2020)*
+* *gar (...)*
 
 This means that (as of this writing!), *dart* is the most recent release branch, and *eel* is the current active branch.  (Sidenote, *angler* is the same as the original *master* branch, which has been removed to avoid confusion.)
 
