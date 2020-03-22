@@ -255,13 +255,7 @@ To answer your question with a question: are you handling ARP?
 Does POX support Python 3?
 ==========================
 
-Not yet.
-
-At this point, Python 2 is still pretty much the standard. Additionally, it's quite common to run POX using the PyPy interpreter, which does not yet support Python 3.  In particular, we don't have much desire to support *both* Python 2 and 3 simultaneously.  So we expect to someday support Python 3, but not until it seems like it's what the majority of users want, and probably not until after PyPy does.
-
-If Python 3 support is important to you *now*, you should start an issue on the github tracker or post about it on pox-dev.  Especially if you're willing to do some of the work, we'll be happy to discuss getting this done, how we can help, and how we can get your work merged into the main repository.
-
-(This question hasn't actually been asked a single time, much less frequently, as its inclusion in a FAQ would imply.  I just wanted to document the answer.)
+This is underway.  The "gar" branch of POX marks the transition from supporting Python 2 to Python 3.  The port to Python 3 for POX is relatively involved, and early Python 3 versions will likely be quite buggy.  You can help by submitting issues liberally.
 
 
 I'd like to contribute.  Can I?  Do you have project ideas?
